@@ -5,6 +5,7 @@
 script_begin() {
     TMPDIR="$(mktemp -d)"
     OLD_PWD=$PWD
+    cd $TMPDIR
 }
 
 script_end() {
@@ -16,10 +17,12 @@ script_end() {
 
 script_get_lockname() {
     SCRIPTNAME="$(basename $0)"
-    LOCKNAME="/var/tmp/$SCRIPTNAME.lock"
+    LOCKNAME="/tmp/$USER-$SCRIPTNAME.lock"
 }
 
 script_begin_single() {
+    script_begin
+    #
     script_get_lockname
     if [ -f $LOCKNAME ]; then
 	echo "$SCRIPTNAME is already running! Exiting..."
@@ -27,19 +30,17 @@ script_begin_single() {
     else
 	touch $LOCKNAME
     fi
-    #
-    script_begin
 }
 
 script_end_single() {
-    script_end
-    #
     script_get_lockname
     if [ -f $LOCKNAME ]; then
 	rm -f $LOCKNAME
     else
 	echo "$SCRIPTNAME is dead! May be errors?!..."
     fi
+    #
+    script_end
 }
 
 ## FUNCTIONS>
